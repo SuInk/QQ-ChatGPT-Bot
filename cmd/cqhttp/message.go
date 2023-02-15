@@ -51,7 +51,7 @@ func (bot *Bot) HandleMsg(rawData []byte) {
 		log.Println(err)
 	}
 	// 准备处理消息
-	isAt, err := regexp.MatchString(`[CQ:at,qq=`+string(rcvMsg.SelfId)+`]`, rcvMsg.RawMessage)
+	isAt, err := regexp.MatchString(`CQ:at,qq=`+strconv.FormatInt(rcvMsg.SelfId, 10), rcvMsg.RawMessage)
 	if err != nil {
 		log.Println(err)
 	}
