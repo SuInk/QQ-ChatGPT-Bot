@@ -2,6 +2,7 @@ package cqhttp
 
 import (
 	"QQ-ChatGPT-Bot/config"
+	"encoding/json"
 	"github.com/gorilla/websocket"
 	"log"
 	"sync"
@@ -43,7 +44,14 @@ func (bot *Bot) Read(conn *websocket.Conn) {
 			log.Println(err)
 			break
 		}
+		var rcvMsg RcvMsg
+		err = json.Unmarshal(msg, &rcvMsg)
+		if err != nil {
+			log.Println(err)
+		}
 		//处理收到的消息
-		go bot.HandleMsg(msg)
+		if rcvMsg.PostType == "message" {
+			go bot.HandleMsg(rcvMsg)
+		}
 	}
 }

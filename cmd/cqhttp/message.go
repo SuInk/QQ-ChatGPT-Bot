@@ -44,12 +44,8 @@ func init() {
 }
 
 // HandleMsg 对CqHttp发送的json进行处理
-func (bot *Bot) HandleMsg(rawData []byte) {
-	var rcvMsg RcvMsg
-	err := json.Unmarshal(rawData, &rcvMsg)
-	if err != nil {
-		log.Println(err)
-	}
+func (bot *Bot) HandleMsg(rcvMsg RcvMsg) {
+
 	// 准备处理消息
 	isAt, err := regexp.MatchString(`CQ:at,qq=`+strconv.FormatInt(rcvMsg.SelfId, 10), rcvMsg.RawMessage)
 	if err != nil {

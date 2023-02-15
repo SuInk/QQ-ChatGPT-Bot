@@ -3,6 +3,7 @@ package main
 import (
 	"QQ-ChatGPT-Bot/cmd/cqhttp"
 	"log"
+	"time"
 )
 
 func init() {
@@ -12,6 +13,7 @@ func init() {
 func main() {
 	go cqhttp.Run()
 	for {
+		time.Sleep(5 * time.Second)
 	}
 
 }
