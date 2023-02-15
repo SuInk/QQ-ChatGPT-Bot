@@ -1,0 +1,22 @@
+# config.toml 配置文件
+
+# cqhttp机器人配置
+[cqhttp]
+# go-cqhttp的正向WebSocket地址
+websocket = "ws://127.0.0.1:8080"
+# 是否需要@机器人才能触发
+at_only = true
+# 生成中提醒时间秒数
+timeout = 30
+
+# openai配置
+[openai]
+# 你的 OpenAI API Key, 可以在 https://beta.openai.com/account/api-keys 获取
+api_key = "sk-xxxxxx"
+# 使用的模型，默认是 text-davinci-003
+model = "text-davinci-003"
+# 对话温度，越大越随机 参照https://algowriting.medium.com/gpt-3-temperature-setting-101-41200ff0d0be
+temperature = 0.3
+# 每次对话最大生成字符数
+max_tokens = 1000
+
