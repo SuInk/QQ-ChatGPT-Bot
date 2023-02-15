@@ -32,7 +32,6 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: files/qq-chatgpt-bot-linux64
         asset_name: qq-chatgpt-bot-linux64
-        tag: ${{ github.ref }}
         overwrite: true
         
   windows:
@@ -57,7 +56,6 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: files/qq-chatgpt-bot.exe
         asset_name: qq-chatgpt-bot-windows.exe
-        tag: ${{ github.ref }}
         overwrite: true
     
       
