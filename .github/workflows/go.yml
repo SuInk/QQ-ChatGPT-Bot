@@ -24,7 +24,8 @@ jobs:
     - name: Build
       run: |
         go build main.go
-        cp main files/qq-chatgpt-bot
+        mkdir files
+        mv main files/qq-chatgpt-bot
       
 
     - name: Upload compressed files to release
