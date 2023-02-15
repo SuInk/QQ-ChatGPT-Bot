@@ -31,7 +31,7 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: files/qq-chatgpt-bot-linux64
-        asset_name: qq-chatgpt-bot-linux64-${{ github.ref }}
+        asset_name: qq-chatgpt-bot-linux64
         tag: ${{ github.ref }}
         overwrite: true
         
@@ -49,14 +49,14 @@ jobs:
       run: |
         go build main.go
         mkdir files
-        mv main.exe files/qq-chatgpt-bot-linux64.exe
+        mv main.exe files/qq-chatgpt-bot.exe
       
     - name: Upload compressed files to release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: files/qq-chatgpt-bot-linux64.exe
-        asset_name: qq-chatgpt-bot-linux64-${{ github.ref }}.exe
+        file: files/qq-chatgpt-bot.exe
+        asset_name: qq-chatgpt-bot-windows.exe
         tag: ${{ github.ref }}
         overwrite: true
     
