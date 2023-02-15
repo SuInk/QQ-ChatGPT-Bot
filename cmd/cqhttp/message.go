@@ -5,7 +5,6 @@ import (
 	"QQ-ChatGPT-Bot/config"
 	"encoding/json"
 	"log"
-	"regexp"
 	"strconv"
 	"time"
 )
@@ -44,15 +43,8 @@ func init() {
 }
 
 // HandleMsg 对CqHttp发送的json进行处理
-func (bot *Bot) HandleMsg(rcvMsg RcvMsg) {
+func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 
-	// 准备处理消息
-	isAt, err := regexp.MatchString(`CQ:at,qq=`+strconv.FormatInt(rcvMsg.SelfId, 10), rcvMsg.RawMessage)
-	if err != nil {
-		log.Println(err)
-	}
-	// 去除消息CQ码
-	rcvMsg.Message = regexp.MustCompile(`\[CQ:.*?\]`).ReplaceAllString(rcvMsg.Message, "")
 	switch rcvMsg.MessageType {
 	case "private":
 		go CheckTimeOut("private", rcvMsg.MessageId, rcvMsg.Sender.UserId)
