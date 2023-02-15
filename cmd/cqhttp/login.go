@@ -59,7 +59,7 @@ func (bot *Bot) Read(conn *websocket.Conn) {
 				log.Println(err)
 			}
 			// 去除消息CQ码
-			rcvMsg.Message = regexp.MustCompile(`\[CQ:.*?\]`).ReplaceAllString(rcvMsg.Message, "")
+			rcvMsg.Message = regexp.MustCompile(`\[CQ:.*?]`).ReplaceAllString(rcvMsg.Message, "")
 			if rcvMsg.Message != " " && rcvMsg.Message != "" && rcvMsg.Message != "   " {
 				go bot.HandleMsg(isAt, rcvMsg)
 			}
