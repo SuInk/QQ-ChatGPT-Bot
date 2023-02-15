@@ -51,16 +51,18 @@ func (bot *Bot) Read(conn *websocket.Conn) {
 		if err != nil {
 			log.Println(err)
 		}
-		// 消息预处理Parser
-		isAt, err := regexp.MatchString(`CQ:at,qq=`+strconv.FormatInt(rcvMsg.SelfId, 10), rcvMsg.RawMessage)
-		if err != nil {
-			log.Println(err)
-		}
-		// 去除消息CQ码
-		rcvMsg.Message = regexp.MustCompile(`\[CQ:.*?\]`).ReplaceAllString(rcvMsg.Message, "")
 		//处理收到的消息
-		if rcvMsg.PostType == "message" && rcvMsg.RawMessage != "" && rcvMsg.RawMessage != " " && rcvMsg.RawMessage != "  " && rcvMsg.RawMessage != "   " {
-			go bot.HandleMsg(isAt, rcvMsg)
+		if rcvMsg.PostType == "message" {
+			// 消息预处理Parser
+			isAt, err := regexp.MatchString(`CQ:at,qq=`+strconv.FormatInt(rcvMsg.SelfId, 10), rcvMsg.RawMessage)
+			if err != nil {
+				log.Println(err)
+			}
+			// 去除消息CQ码
+			rcvMsg.Message = regexp.MustCompile(`\[CQ:.*?\]`).ReplaceAllString(rcvMsg.Message, "")
+			if rcvMsg.Message != " " && rcvMsg.Message != "" && rcvMsg.Message != "   " {
+				go bot.HandleMsg(isAt, rcvMsg)
+			}
 		}
 	}
 }
