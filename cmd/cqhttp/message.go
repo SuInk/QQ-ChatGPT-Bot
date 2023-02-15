@@ -67,7 +67,7 @@ func (bot *Bot) HandleMsg(rcvMsg RcvMsg) {
 		if !isAt && config.Cfg.CqHttp.AtOnly || rcvMsg.Sender.UserId == bot.QQ {
 			return
 		}
-		go CheckTimeOut("group", rcvMsg.MessageId, rcvMsg.Sender.UserId)
+		go CheckTimeOut("group", rcvMsg.MessageId, rcvMsg.GroupId)
 		err := bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+chatgpt.GenerateText(rcvMsg.Message))
 		bot.MQ <- &rcvMsg
 		if err != nil {
@@ -88,7 +88,7 @@ func CheckTimeOut(msgType string, msgId int64, userId int64) {
 				log.Println(err)
 			}
 		case "group":
-			err := bot.SendGroupMsg(userId, "思考中，请耐心等待~")
+			err := bot.SendGroupMsg(userId, "[CQ:reply,id="+strconv.FormatInt(msgId, 10)+"]"+"思考中，请耐心等待~")
 			if err != nil {
 				log.Println(err)
 			}

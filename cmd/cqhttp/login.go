@@ -50,7 +50,7 @@ func (bot *Bot) Read(conn *websocket.Conn) {
 			log.Println(err)
 		}
 		//处理收到的消息
-		if rcvMsg.PostType == "message" {
+		if rcvMsg.PostType == "message" && rcvMsg.RawMessage != "" && rcvMsg.RawMessage != " " {
 			go bot.HandleMsg(rcvMsg)
 		}
 	}
