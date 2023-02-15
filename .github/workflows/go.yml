@@ -32,8 +32,8 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: qq-chatgpt-bot-linux64
-        asset_name: Linux-quickstart-${{ github.ref }}.zip
+        file: files/qq-chatgpt-bot-linux64
+        asset_name: Linux-${{ github.ref }}.zip
         tag: ${{ github.ref }}
         overwrite: true
         
