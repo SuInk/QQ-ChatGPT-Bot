@@ -5,9 +5,8 @@ name: Go
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - '**'
 
 jobs:
   linux:
@@ -20,18 +19,24 @@ jobs:
       with:
         go-version: 1.19
 
-    - name: Build
+    - name: build and pack
       run: |
         go build main.go
         mkdir files
         mv main files/qq-chatgpt-bot-linux64
-      
+        cd files
+        mkdir go-cqhttp
+        wget https://github.com/Mrs4s/go-cqhttp/releases/download/v1.0.0-rc4/go-cqhttp_linux_amd64.tar.gz -O go-cqhttp/go-cqhttp_linux_amd64.tar.gz
+        tar -zxvf go-cqhttp/go-cqhttp_linux_amd64.tar.gz -C go-cqhttp
+        rm go-cqhttp/go-cqhttp_linux_amd64.tar.gz
+        cd ..
+        tar -cvf files/qq-chatgpt-bot-linux64.tar.gz files/qq-chatgpt-bot-linux64 files/go-cqhttp
     - name: Upload compressed files to release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: files/qq-chatgpt-bot-linux64
-        asset_name: qq-chatgpt-bot-linux64
+        file: files/qq-chatgpt-bot-linux64.tar.gz
+        asset_name: qq-chatgpt-bot-linux64.tar.gz
         overwrite: true
         
   windows:
@@ -44,18 +49,22 @@ jobs:
       with:
         go-version: 1.19
 
-    - name: Build
+    - name: Build && pack
       run: |
         go build main.go
         mkdir files
         mv main.exe files/qq-chatgpt-bot.exe
-      
+        cd files
+        mkdir go-cqhttp
+        wget https://github.com/Mrs4s/go-cqhttp/releases/download/v1.0.0-rc4/go-cqhttp_windows_amd64.exe -O files/go-cqhttp/go-cqhttp_windows_amd64.exe
+        cd ..
+        zip  -r files/qq-chatgpt-bot-windows-amd64.zip go-cqhttp files/qq-chatgpt-bot.exe
     - name: Upload compressed files to release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: files/qq-chatgpt-bot.exe
-        asset_name: qq-chatgpt-bot-windows.exe
+        file: files/qq-chatgpt-bot-windows-amd64.zip
+        asset_name: qq-chatgpt-bot-windows-amd64.zip
         overwrite: true
     
       
