@@ -76,7 +76,7 @@ func TimeOutCheck() {
 		// 搞不懂要不要加锁
 		bot.MX.Lock()
 		sentTime := time.Unix(msg.Time, 0)
-		if time.Now().Sub(sentTime) > time.Duration(config.Cfg.CqHttp.TimeOut)*time.Second {
+		if time.Now().Sub(sentTime) > time.Duration(config.Cfg.CqHttp.TimeOut)*time.Second && time.Now().Sub(sentTime) < time.Duration(config.Cfg.CqHttp.TimeOut+1)*time.Second {
 			log.Println("思考中，请耐心等待~")
 			switch msg.MessageType {
 			case "private":
@@ -90,9 +90,7 @@ func TimeOutCheck() {
 					log.Println(err)
 				}
 			}
-			break
 		}
-		log.Println(time.Now().Sub(sentTime))
 		mq <- msg
 		time.Sleep(time.Second)
 		bot.MX.Unlock()
