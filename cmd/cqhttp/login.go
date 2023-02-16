@@ -39,6 +39,7 @@ func Run() {
 		break
 	}
 }
+
 func (bot *Bot) Read(conn *websocket.Conn) {
 	for {
 		_, msg, err := conn.ReadMessage()

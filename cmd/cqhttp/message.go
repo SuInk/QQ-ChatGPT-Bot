@@ -47,44 +47,55 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 
 	switch rcvMsg.MessageType {
 	case "private":
-		go CheckTimeOut("private", rcvMsg.MessageId, rcvMsg.Sender.UserId)
-		err := bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+chatgpt.GenerateText(rcvMsg.Message))
 		bot.MQ <- &rcvMsg
+		err := bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+chatgpt.GenerateText(rcvMsg.Message))
 		if err != nil {
 			log.Println(err)
 		}
-		//<-bot.MQ
+		<-bot.MQ
 	case "group":
 		// 群消息@机器人才处理
 		if !isAt && config.Cfg.CqHttp.AtOnly || rcvMsg.Sender.UserId == bot.QQ {
 			return
 		}
-		go CheckTimeOut("group", rcvMsg.MessageId, rcvMsg.GroupId)
-		err := bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+chatgpt.GenerateText(rcvMsg.Message))
 		bot.MQ <- &rcvMsg
+		err := bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+chatgpt.GenerateText(rcvMsg.Message))
 		if err != nil {
 			log.Println(err)
 		}
+		<-bot.MQ
+
 	}
 
 }
-func CheckTimeOut(msgType string, msgId int64, userId int64) {
-	// 检查超时
-	select {
-	case <-bot.MQ:
-	case <-time.After(time.Second * time.Duration(config.Cfg.CqHttp.TimeOut)):
-		switch msgType {
-		case "private":
-			err := bot.SendPrivateMsg(userId, "[CQ:reply,id="+strconv.FormatInt(msgId, 10)+"]"+"思考中，请耐心等待~")
-			if err != nil {
-				log.Println(err)
+
+// TimeOutCheck 检查消息队列中的消息是否超时
+func TimeOutCheck() {
+	mq := bot.MQ
+	for msg := range mq {
+		// 搞不懂要不要加锁
+		bot.MX.Lock()
+		sentTime := time.Unix(msg.Time, 0)
+		if time.Now().Sub(sentTime) > time.Duration(config.Cfg.CqHttp.TimeOut)*time.Second {
+			log.Println("思考中，请耐心等待~")
+			switch msg.MessageType {
+			case "private":
+				err := bot.SendPrivateMsg(msg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(msg.MessageId, 10)+"]"+"思考中，请耐心等待~")
+				if err != nil {
+					log.Println(err)
+				}
+			case "group":
+				err := bot.SendGroupMsg(msg.GroupId, "[CQ:reply,id="+strconv.FormatInt(msg.MessageId, 10)+"]"+"思考中，请耐心等待~")
+				if err != nil {
+					log.Println(err)
+				}
 			}
-		case "group":
-			err := bot.SendGroupMsg(userId, "[CQ:reply,id="+strconv.FormatInt(msgId, 10)+"]"+"思考中，请耐心等待~")
-			if err != nil {
-				log.Println(err)
-			}
+			break
 		}
+		log.Println(time.Now().Sub(sentTime))
+		mq <- msg
+		time.Sleep(time.Second)
+		bot.MX.Unlock()
 	}
 }
 func (bot *Bot) SendPrivateMsg(userId int64, text string) error {

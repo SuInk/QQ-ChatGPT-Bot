@@ -18,8 +18,8 @@ func main() {
 		}
 	}()
 	go cqhttp.Run()
-	for {
-		time.Sleep(5 * time.Second)
+	for range time.Tick(time.Second) {
+		cqhttp.TimeOutCheck()
 	}
 
 }
