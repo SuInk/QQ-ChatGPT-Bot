@@ -1,6 +1,6 @@
 # QQ-ChatGPT-Bot
 实现openai qq对话功能，原生跨平台
-![Screenshot_2023-02](https://s2.loli.net/2023/02/16/zJXgnOxRY1w4jZE.jpg)
+![image.png](https://s2.loli.net/2023/02/24/Je5znWf3wuUERy8.png)
 
 ## 如何使用
 1. 下载[go-cqhttp](https://github.com/Mrs4s/go-cqhttp/releases)
