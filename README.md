@@ -11,10 +11,25 @@
 ### Linux
 ```bash
 ./go-cqhttp*
-# 按照提示操作，将本地登录过的`sesssion.token`复制进服务器，防止tx风控
+# 按照提示操作,选择2正向websocket，将本地登录过的`sesssion.token`复制进服务器，防止tx风控
 ./QQ-ChatGPT*
 # 在config.cfg填入openai的api_key 
 # 关掉窗口，运行：
 nohup ./go-cqhttp* &
 nohup ./QQ-ChatGPT* &
+```
+```bash
+# config.yaml cqhttp配置文件
+servers:
+  # 添加方式，同一连接方式可添加多个，具体配置说明请查看文档
+  #- http: # http 通信
+  #- ws:   # 正向 Websocket
+  #- ws-reverse: # 反向 Websocket
+  #- pprof: #性能分析服务器
+  # 正向WS设置
+  - ws:
+      # 正向WS服务器监听地址
+      address: 0.0.0.0:8080
+      middlewares:
+        <<: *default # 引用默认中间件
 ```
