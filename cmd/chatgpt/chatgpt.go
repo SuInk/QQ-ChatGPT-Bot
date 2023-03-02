@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-const OpenaiApiUrl = "https://api.openai.com/v1/completions"
+const OpenaiApiUrl = "https://api.openai.com/v1/chat/completions"
 
 type OpenAiRcv struct {
 	Id      string `json:"id"`
@@ -19,10 +19,11 @@ type OpenAiRcv struct {
 	Created int64  `json:"created"`
 	Model   string `json:"model"`
 	Choices []struct {
-		Text         string      `json:"text"`
-		Index        int         `json:"index"`
-		Logprobs     interface{} `json:"logprobs"`
-		FinishReason string      `json:"finish_reason"`
+		Message struct {
+			Role    string `json:"role"`
+			Content string `json:"content"`
+		} `json:"message"`
+		FinishReason string `json:"finish_reason"`
 	} `json:"choices"`
 	Usage struct {
 		PromptTokens    int `json:"prompt_tokens"`
@@ -36,10 +37,10 @@ func GenerateText(text string) string {
 	log.Println("正在调用OpenAI API生成文本...", text)
 	postData := []byte(fmt.Sprintf(`{
 	  "model": "%s",
-	  "prompt": "%s",
+	  "messages": %s,
 	  "max_tokens": %d,
 	  "temperature": %.1f
-	}`, config.Cfg.OpenAi.Model, text, config.Cfg.OpenAi.MaxTokens, config.Cfg.OpenAi.Temperature))
+	}`, config.Cfg.OpenAi.Model, "[{\"role\": \"user\", \"content\": \""+text+"\"}]", config.Cfg.OpenAi.MaxTokens, config.Cfg.OpenAi.Temperature))
 	req, _ := http.NewRequest("POST", OpenaiApiUrl, bytes.NewBuffer(postData))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+config.Cfg.OpenAi.ApiKey)
@@ -58,7 +59,7 @@ func GenerateText(text string) string {
 		log.Println("OpenAI API调用失败，返回内容：", string(body))
 		return string(body)
 	}
-	openAiRcv.Choices[0].Text = strings.ReplaceAll(openAiRcv.Choices[0].Text, "\n\n", "")
+	openAiRcv.Choices[0].Message.Content = strings.ReplaceAll(openAiRcv.Choices[0].Message.Content, "\n\n", "")
 	log.Printf("Model: %s TotalTokens: %d+%d=%d", openAiRcv.Model, openAiRcv.Usage.PromptTokens, openAiRcv.Usage.CompletionTokes, openAiRcv.Usage.TotalTokens)
-	return openAiRcv.Choices[0].Text
+	return openAiRcv.Choices[0].Message.Content
 }
