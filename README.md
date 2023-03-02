@@ -6,7 +6,7 @@
 1. 下载[go-cqhttp](https://github.com/Mrs4s/go-cqhttp/releases)
 2. 下载[QQ-ChatGPT-Bot](https://github.com/SuInk/QQ-ChatGPT-Bot/releases)
 ### Windows
-* 双击go-cqhttp可执行文件，按照提示登录QQ
+* 双击go-cqhttp可执行文件，按照提示登录QQ,选择2正向WebSocket
 * 双击QQ-ChatGPT-Bot可执行文件，将openai的api_key 填入`config.cfg`中，再次运行
 ### Linux
 ```bash
