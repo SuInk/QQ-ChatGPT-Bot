@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -32,6 +33,24 @@ type OpenAiRcv struct {
 	}
 }
 
+func Client() (http.Client, error) {
+	if config.Cfg.OpenAi.UseProxy == false {
+		return http.Client{}, nil
+	}
+	// 设置clash代理
+	uri, err := url.Parse(config.Cfg.OpenAi.ProxyUrl)
+	if err != nil {
+		log.Fatal(err)
+		return http.Client{}, nil
+	}
+	client := http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyURL(uri),
+		},
+	}
+	return client, nil
+}
+
 // GenerateText 调用openai的API生成文本
 func GenerateText(text string) string {
 	log.Println("正在调用OpenAI API生成文本...", text)
@@ -44,7 +63,11 @@ func GenerateText(text string) string {
 	req, _ := http.NewRequest("POST", OpenaiApiUrl, bytes.NewBuffer(postData))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+config.Cfg.OpenAi.ApiKey)
-	resp, err := http.DefaultClient.Do(req)
+	client, err := Client()
+	if err != nil {
+		log.Println(err)
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
 	}

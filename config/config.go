@@ -17,7 +17,9 @@ type Config struct {
 		ApiKey      string `mapstructure:"api_key"`
 		Model       string
 		Temperature float32
-		MaxTokens   int `mapstructure:"max_tokens"`
+		MaxTokens   int    `mapstructure:"max_tokens"`
+		UseProxy    bool   `mapstructure:"use_proxy"`
+		ProxyUrl    string `mapstructure:"proxy_url"`
 	}
 }
 
