@@ -59,7 +59,7 @@ func GenerateText(text string) string {
 		log.Println("OpenAI API调用失败，返回内容：", string(body))
 		return string(body)
 	}
-	openAiRcv.Choices[0].Message.Content = strings.ReplaceAll(openAiRcv.Choices[0].Message.Content, "\n\n", "")
+	openAiRcv.Choices[0].Message.Content = strings.Replace(openAiRcv.Choices[0].Message.Content, "\n\n", "\n", 1)
 	log.Printf("Model: %s TotalTokens: %d+%d=%d", openAiRcv.Model, openAiRcv.Usage.PromptTokens, openAiRcv.Usage.CompletionTokes, openAiRcv.Usage.TotalTokens)
 	return openAiRcv.Choices[0].Message.Content
 }
