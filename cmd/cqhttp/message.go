@@ -48,7 +48,13 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 	switch rcvMsg.MessageType {
 	case "private":
 		bot.MQ <- &rcvMsg
-		err := bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+chatgpt.GenerateText(rcvMsg.Message))
+		msg := chatgpt.GenerateText(rcvMsg.Message)
+		var err error
+		if msg != "" {
+			err = bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+msg)
+		} else {
+			err = bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+"生成错误！")
+		}
 		if err != nil {
 			log.Println(err)
 		}
@@ -59,7 +65,13 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 			return
 		}
 		bot.MQ <- &rcvMsg
-		err := bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+chatgpt.GenerateText(rcvMsg.Message))
+		msg := chatgpt.GenerateText(rcvMsg.Message)
+		var err error
+		if msg != "" {
+			err = bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+chatgpt.GenerateText(rcvMsg.Message))
+		} else {
+			err = bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+"生成错误！")
+		}
 		if err != nil {
 			log.Println(err)
 		}
