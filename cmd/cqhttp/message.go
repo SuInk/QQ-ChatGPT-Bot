@@ -48,14 +48,7 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 	switch rcvMsg.MessageType {
 	case "private":
 		bot.MQ <- &rcvMsg
-		//假如生成信息错误，直接处理掉，避免程序因为错误信息崩溃。不过没细看为什么会出现错误。
-		msg := chatgpt.GenerateText(rcvMsg.Message)
-		var err error
-		if msg == "" {
-			err = bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+"生成失败！")
-		} else {
-			err = bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+msg)
-		}
+		err := bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+chatgpt.GenerateText(rcvMsg.Message))
 		if err != nil {
 			log.Println(err)
 		}
@@ -66,13 +59,7 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 			return
 		}
 		bot.MQ <- &rcvMsg
-		msg := chatgpt.GenerateText(rcvMsg.Message)
-		var err error
-		if msg == "" {
-			err = bot.SendGroupMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+"生成失败！")
-		} else {
-			err = bot.SendGroupMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+msg)
-		}
+		err := bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+chatgpt.GenerateText(rcvMsg.Message))
 		if err != nil {
 			log.Println(err)
 		}

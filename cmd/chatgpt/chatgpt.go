@@ -70,7 +70,6 @@ func GenerateText(text string) string {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
-		return ""
 	}
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
