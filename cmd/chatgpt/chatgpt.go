@@ -4,7 +4,6 @@ import (
 	"QQ-ChatGPT-Bot/config"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -54,15 +53,30 @@ func Client() (http.Client, error) {
 // GenerateText 调用openai的API生成文本
 func GenerateText(text string) string {
 	log.Println("正在调用OpenAI API生成文本...", text)
-	text = strings.ReplaceAll(text, "\r", "")
-	text = strings.ReplaceAll(text, "\n", "\\n")
-	postData := []byte(fmt.Sprintf(`{
-	  "model": "%s",
-	  "messages": %s,
-	  "max_tokens": %d,
-	  "temperature": %.1f
-	}`, config.Cfg.OpenAi.Model, "[{\"role\": \"user\", \"content\": \""+text+"\"}]", config.Cfg.OpenAi.MaxTokens, config.Cfg.OpenAi.Temperature))
-	req, _ := http.NewRequest("POST", OpenaiApiUrl, bytes.NewBuffer(postData))
+	message := struct {
+		Role    string `json:"role"`
+		Content string `json:"content"`
+	}{
+		Role:    "user",
+		Content: text,
+	}
+	postData := struct {
+		Model       string        `json:"model"`
+		Messages    []interface{} `json:"messages"`
+		MaxTokens   int           `json:"max_tokens"`
+		Temperature float64       `json:"temperature"`
+	}{
+		Model:       config.Cfg.OpenAi.Model,
+		Messages:    []interface{}{message},
+		MaxTokens:   config.Cfg.OpenAi.MaxTokens,
+		Temperature: float64(config.Cfg.OpenAi.Temperature),
+	}
+	postDataBytes, err := json.Marshal(postData)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	req, _ := http.NewRequest("POST", OpenaiApiUrl, bytes.NewBuffer(postDataBytes))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+config.Cfg.OpenAi.ApiKey)
 	client, err := Client()
