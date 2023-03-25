@@ -54,6 +54,8 @@ func Client() (http.Client, error) {
 // GenerateText 调用openai的API生成文本
 func GenerateText(text string) string {
 	log.Println("正在调用OpenAI API生成文本...", text)
+	text = strings.ReplaceAll(text, "\r", "")
+	text = strings.ReplaceAll(text, "\n", "\\n")
 	postData := []byte(fmt.Sprintf(`{
 	  "model": "%s",
 	  "messages": %s,
