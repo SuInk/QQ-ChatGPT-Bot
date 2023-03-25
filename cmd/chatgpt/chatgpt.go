@@ -75,6 +75,10 @@ func GenerateText(text string) string {
 		return ""
 	}
 	defer resp.Body.Close()
+	if resp == nil {
+		log.Println("response is nil")
+		return ""
+	}
 	body, _ := io.ReadAll(resp.Body)
 	var openAiRcv OpenAiRcv
 	err = json.Unmarshal(body, &openAiRcv)
