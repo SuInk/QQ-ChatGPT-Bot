@@ -8,6 +8,7 @@
 ### Windows
 * 双击go-cqhttp可执行文件，按照提示登录QQ,选择2正向WebSocket
 * 双击QQ-ChatGPT-Bot可执行文件，将openai的api_key 填入`config.cfg`中，再次运行
+* 如果要使用角色扮演功能，则请在config中的identity下填写想要bot扮演的角色的信息。同时，请将openai配置下的model更换成“text-davinci-003”。如不想使用角色扮演功能，请直接删掉identity下prompt里双引号内的内容。
 ### Linux
 ```bash
 ./go-cqhttp*
