@@ -7,11 +7,6 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-type Messages struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
 type SessionService struct {
 	cache *cache.Cache
 }

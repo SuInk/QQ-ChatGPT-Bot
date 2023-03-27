@@ -21,6 +21,11 @@ func init() {
 const Openaiapiurl1 = "https://api.openai.com/v1/chat/completions" //对话使用的url
 const Openaiapiurl2 = "https://api.openai.com/v1/completions"      //角色扮演使用的url
 
+type Messages struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
 // 对话使用的Request body
 type postData struct {
 	Model       string     `json:"model"`
