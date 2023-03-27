@@ -46,7 +46,13 @@ func init() {
 
 // HandleMsg 对CqHttp发送的json进行处理
 func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
-
+        // panic处理 暂时无法判断是否生效
+        defer func() {
+		if err := recover(); err != nil {
+			log.Println("panic:", err)
+			return
+		}
+	}()
 	switch rcvMsg.MessageType {
 	case "private":
 		bot.MQ <- &rcvMsg
