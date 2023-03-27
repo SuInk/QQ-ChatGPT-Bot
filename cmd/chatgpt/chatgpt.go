@@ -1,7 +1,6 @@
 package chatgpt
 
 import (
-	"QQ-ChatGPT-Bot/config"
 	"bytes"
 	"encoding/json"
 	"io"
@@ -9,17 +8,25 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"QQ-ChatGPT-Bot/config"
 )
+
+var Cache CacheInterface
+
+func init() {
+	Cache = GetSessionCache()
+}
 
 const Openaiapiurl1 = "https://api.openai.com/v1/chat/completions" //对话使用的url
 const Openaiapiurl2 = "https://api.openai.com/v1/completions"      //角色扮演使用的url
 
 // 对话使用的Request body
 type postData struct {
-	Model       string        `json:"model"`
-	Messages    []interface{} `json:"messages"`
-	MaxTokens   int           `json:"max_tokens"`
-	Temperature float64       `json:"temperature"`
+	Model       string     `json:"model"`
+	Messages    []Messages `json:"messages"`
+	MaxTokens   int        `json:"max_tokens"`
+	Temperature float64    `json:"temperature"`
 }
 
 // 角色扮演使用的Request body
@@ -38,11 +45,8 @@ type OpenAiRcv struct {
 	Created int64  `json:"created"`
 	Model   string `json:"model"`
 	Choices []struct {
-		Message struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		} `json:"message"`
-		FinishReason string `json:"finish_reason"`
+		Message      Messages `json:"message"`
+		FinishReason string   `json:"finish_reason"`
 	} `json:"choices"`
 	Usage struct {
 		PromptTokens    int `json:"prompt_tokens"`
@@ -89,27 +93,26 @@ func Client() (http.Client, error) {
 }
 
 // ChooseGenerateWay 选择生成方式
-func ChooseGenerateWay(text string) string {
+func ChooseGenerateWay(session string, text string) string {
 	log.Println("正在调用OpenAI API生成文本...", text)
 	if config.Cfg.Identity.Prompt == "" {
-		return GenerateText(text)
+		return GenerateText(session, text)
 	} else {
 		return GenerateTextWithIdentity(text)
 	}
 }
 
 // GenerateText 调用openai的API生成文本
-func GenerateText(text string) string {
-	message := struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
-	}{
+func GenerateText(session string, text string) string {
+	ms := Cache.GetMsg(session)
+	message := &Messages{
 		Role:    "user",
 		Content: text,
 	}
+	ms = append(ms, *message)
 	postDataTemp := postData{
 		Model:       config.Cfg.OpenAi.Model,
-		Messages:    []interface{}{message},
+		Messages:    ms,
 		MaxTokens:   config.Cfg.OpenAi.MaxTokens,
 		Temperature: float64(config.Cfg.OpenAi.Temperature),
 	}
@@ -145,6 +148,9 @@ func GenerateText(text string) string {
 		log.Println("OpenAI API调用失败，返回内容：", string(body))
 		return string(body)
 	}
+	// 保存上下文
+	ms = append(ms, openAiRcv.Choices[0].Message)
+	Cache.SetMsg(session, ms)
 	openAiRcv.Choices[0].Message.Content = strings.Replace(openAiRcv.Choices[0].Message.Content, "\n\n", "\n", 1)
 	log.Printf("Model: %s TotalTokens: %d+%d=%d", openAiRcv.Model, openAiRcv.Usage.PromptTokens, openAiRcv.Usage.CompletionTokes, openAiRcv.Usage.TotalTokens)
 	return openAiRcv.Choices[0].Message.Content

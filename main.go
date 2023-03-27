@@ -1,8 +1,9 @@
 package main
 
 import (
-	"QQ-ChatGPT-Bot/cmd/cqhttp"
 	"log"
+
+	"QQ-ChatGPT-Bot/cmd/cqhttp"
 )
 
 func init() {
