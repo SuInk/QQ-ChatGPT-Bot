@@ -100,7 +100,7 @@ func Client() (http.Client, error) {
 // ChooseGenerateWay 选择生成方式
 func ChooseGenerateWay(session string, text string) string {
 	log.Println("正在调用OpenAI API生成文本...", text)
-	if config.Cfg.Identity.Prompt == "" {
+	if config.Cfg.Identity.UseIdentity == false {
 		return GenerateText(session, text)
 	} else {
 		return GenerateTextWithIdentity(text)
