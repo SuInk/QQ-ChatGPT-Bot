@@ -1,14 +1,16 @@
 package cqhttp
 
 import (
-	"QQ-ChatGPT-Bot/config"
 	"encoding/json"
-	"github.com/gorilla/websocket"
 	"log"
 	"regexp"
 	"strconv"
 	"sync"
 	"time"
+
+	"QQ-ChatGPT-Bot/config"
+
+	"github.com/gorilla/websocket"
 )
 
 type Bot struct {

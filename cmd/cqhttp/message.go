@@ -1,12 +1,14 @@
 package cqhttp
 
 import (
-	"QQ-ChatGPT-Bot/cmd/chatgpt"
-	"QQ-ChatGPT-Bot/config"
 	"encoding/json"
 	"log"
 	"strconv"
+	"strings"
 	"time"
+
+	"QQ-ChatGPT-Bot/cmd/chatgpt"
+	"QQ-ChatGPT-Bot/config"
 )
 
 type RcvMsg struct {
@@ -48,7 +50,11 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 	switch rcvMsg.MessageType {
 	case "private":
 		bot.MQ <- &rcvMsg
-		msg := chatgpt.ChooseGenerateWay(rcvMsg.Message)
+		if strings.Contains(rcvMsg.Message, "clear") {
+			chatgpt.Cache.Clear(strconv.FormatInt(rcvMsg.Sender.UserId, 10))
+			return
+		}
+		msg := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.Sender.UserId, 10), rcvMsg.Message)
 		var err error
 		if msg != "" {
 			err = bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+msg)
@@ -64,8 +70,12 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 		if !isAt && config.Cfg.CqHttp.AtOnly || rcvMsg.Sender.UserId == bot.QQ {
 			return
 		}
+		if strings.Contains(rcvMsg.Message, "clear") {
+			chatgpt.Cache.Clear(strconv.FormatInt(rcvMsg.GroupId, 10))
+			return
+		}
 		bot.MQ <- &rcvMsg
-		msg := chatgpt.ChooseGenerateWay(rcvMsg.Message)
+		msg := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.GroupId, 10), rcvMsg.Message)
 		var err error
 		if msg != "" {
 			err = bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+msg)
