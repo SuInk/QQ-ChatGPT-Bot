@@ -1,5 +1,7 @@
 # QQ-ChatGPT-Bot
-实现openai qq对话功能，原生跨平台
+实现openai qq对话功能
+* 支持连续对话(感谢[@CsterKuroi](https://github.com/CsterKuroi))
+* 支持预设(感谢[@lvyonghuan](https://github.com/lvyonghuan))
 ![image.png](https://s2.loli.net/2023/03/27/6VJEKkDsA8dIBzL.png)
 
 ## 如何使用
