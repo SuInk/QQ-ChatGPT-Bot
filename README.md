@@ -28,6 +28,7 @@ nohup ./QQ-ChatGPT* &
 ```
 ### 手动运行
 ```bash
+先运行go-cqhttp
 git clone git@github.com:SuInk/QQ-ChatGPT-Bot.git
 cd QQ-ChatGPT-Bot
 go run main.go
