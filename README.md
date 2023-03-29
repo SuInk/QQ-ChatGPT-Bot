@@ -7,7 +7,7 @@
 
 ## 如何使用
 ### 前置工作
-1. 前往https://beta.openai.com/account/api-keys获取api_key
+1. 前往https://beta.openai.com/account/api-keys 获取api_key
 2. 大陆用户安装[Clash](https://github.com/Dreamacro/clash/releases) Linux参照https://zhuanlan.zhihu.com/p/396272999
 ### 正式开始
 1. 下载[go-cqhttp](https://github.com/Mrs4s/go-cqhttp/releases)
@@ -28,6 +28,7 @@ nohup ./QQ-ChatGPT* &
 ```
 ### 手动运行
 ```bash
+先运行go-cqhttp
 git clone git@github.com:SuInk/QQ-ChatGPT-Bot.git
 cd QQ-ChatGPT-Bot
 go run main.go
@@ -53,7 +54,7 @@ servers:
         <<: *default # 引用默认中间件
 ```
 ### QQ-ChatGPT-Bot配置文件
-```toml
+```bash
 ...
 [openai]
 # 你的 OpenAI API Key, 可以在 https://beta.openai.com/account/api-keys 获取

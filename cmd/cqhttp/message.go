@@ -46,8 +46,8 @@ func init() {
 
 // HandleMsg 对CqHttp发送的json进行处理
 func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
-        // panic处理 暂时无法判断是否生效
-        defer func() {
+	// panic处理 暂时无法判断是否生效
+	defer func() {
 		if err := recover(); err != nil {
 			log.Println("panic:", err)
 			return
@@ -55,6 +55,11 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 	}()
 	switch rcvMsg.MessageType {
 	case "private":
+		// 包含关键词才触发，运算符优先级 && > ||
+		if config.Cfg.CqHttp.UseKeyword && !strings.Contains(rcvMsg.Message, config.Cfg.CqHttp.Keyword) && (config.Cfg.CqHttp.KeywordType == "all" || config.Cfg.CqHttp.KeywordType == "private") || rcvMsg.Sender.UserId == bot.QQ {
+			return
+		}
+		rcvMsg.Message = strings.ReplaceAll(rcvMsg.Message, config.Cfg.CqHttp.Keyword, "")
 		bot.MQ <- &rcvMsg
 		if strings.Contains(rcvMsg.Message, "clear") {
 			chatgpt.Cache.Clear(strconv.FormatInt(rcvMsg.Sender.UserId, 10))
@@ -76,6 +81,11 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 		if !isAt && config.Cfg.CqHttp.AtOnly || rcvMsg.Sender.UserId == bot.QQ {
 			return
 		}
+		// 检查是否有关键词
+		if config.Cfg.CqHttp.UseKeyword && !strings.Contains(rcvMsg.Message, config.Cfg.CqHttp.Keyword) && (config.Cfg.CqHttp.KeywordType == "all" || config.Cfg.CqHttp.KeywordType == "group") {
+			return
+		}
+		rcvMsg.Message = strings.ReplaceAll(rcvMsg.Message, config.Cfg.CqHttp.Keyword, "")
 		if strings.Contains(rcvMsg.Message, "clear") {
 			chatgpt.Cache.Clear(strconv.FormatInt(rcvMsg.GroupId, 10))
 			return
