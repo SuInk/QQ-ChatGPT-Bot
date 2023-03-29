@@ -53,7 +53,7 @@ servers:
         <<: *default # 引用默认中间件
 ```
 ### QQ-ChatGPT-Bot配置文件
-```toml
+```bash
 ...
 [openai]
 # 你的 OpenAI API Key, 可以在 https://beta.openai.com/account/api-keys 获取
