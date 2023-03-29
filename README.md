@@ -7,7 +7,7 @@
 
 ## 如何使用
 ### 前置工作
-1. 前往https://beta.openai.com/account/api-keys获取api_key
+1. 前往https://beta.openai.com/account/api-keys 获取api_key
 2. 大陆用户安装[Clash](https://github.com/Dreamacro/clash/releases) Linux参照https://zhuanlan.zhihu.com/p/396272999
 ### 正式开始
 1. 下载[go-cqhttp](https://github.com/Mrs4s/go-cqhttp/releases)
