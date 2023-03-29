@@ -79,6 +79,7 @@ type OpenAiRcvWithIdentity struct {
 	}
 }
 
+// Client 返回代理客户端
 func Client() (http.Client, error) {
 	if config.Cfg.OpenAi.UseProxy == false {
 		return http.Client{}, nil
@@ -136,7 +137,7 @@ func GenerateText(session string, text string) string {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
-		return ""
+		return err.Error()
 	}
 	defer resp.Body.Close()
 	if resp == nil {
@@ -148,6 +149,7 @@ func GenerateText(session string, text string) string {
 	err = json.Unmarshal(body, &openAiRcv)
 	if err != nil {
 		log.Println(err)
+		return err.Error()
 	}
 	if len(openAiRcv.Choices) == 0 {
 		log.Println("OpenAI API调用失败，返回内容：", string(body))
@@ -173,7 +175,7 @@ func GenerateTextWithIdentity(text string) string {
 	postDataBytes, err := json.Marshal(postDataTemp)
 	if err != nil {
 		log.Println(err)
-		return ""
+		return err.Error()
 	}
 	req, _ := http.NewRequest("POST", Openaiapiurl2, bytes.NewBuffer(postDataBytes))
 	req.Header.Set("Content-Type", "application/json")
@@ -185,7 +187,7 @@ func GenerateTextWithIdentity(text string) string {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
-		return ""
+		return err.Error()
 	}
 	defer resp.Body.Close()
 	if resp == nil {

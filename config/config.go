@@ -9,9 +9,12 @@ import (
 
 type Config struct {
 	CqHttp struct {
-		WebSocket string `mapstructure:"websocket"`
-		AtOnly    bool   `mapstructure:"at_only"`
-		TimeOut   int    `mapstructure:"timeout"`
+		WebSocket   string `mapstructure:"websocket"`
+		AtOnly      bool   `mapstructure:"at_only"`
+		UseKeyword  bool   `mapstructure:"use_keyword"`
+		KeywordType string `mapstructure:"keyword_type"`
+		Keyword     string `mapstructure:"keyword"`
+		TimeOut     int    `mapstructure:"timeout"`
 	}
 	OpenAi struct {
 		ApiKey      string `mapstructure:"api_key"`
@@ -37,7 +40,8 @@ func init() {
 		if err != nil {
 			log.Println(err)
 		}
-		_, err = f.Write([]byte("# config.cfg 配置文件\n\n# cqhttp机器人配置\n[cqhttp]\n# go-cqhttp的正向WebSocket地址\nwebsocket = \"ws://127.0.0.1:8080\"\n# 是否需要@机器人才能触发\nat_only = true\n# 生成中提醒时间秒数\ntimeout = 30\n\n# openai配置\n[openai]\n# 你的 OpenAI API Key, 可以在 https://beta.openai.com/account/api-keys 获取\napi_key = \"sk-xxxxxx\"\n# 使用的模型，默认是 gpt-3.5-turbo\nmodel = \"gpt-3.5-turbo\"\n# 对话温度，越大越随机 参照https://algowriting.medium.com/gpt-3-temperature-setting-101-41200ff0d0be\ntemperature = 0.3\n# 每次对话最大生成字符数\nmax_tokens = 1000\n# openai是否走代理，默认关闭\nuse_proxy = false\n# 代理地址\nproxy_url = \"http://127.0.0.1:7890\"\n\n# 角色信息配置\n[identity]\n# 角色扮演功能，默认关闭\nuse_identity = false\n# 角色扮演信息(如果不想使用这个功能，请删掉prompt双引号里的内容）（设定可以参考：https://github.com/easydu2002/chat_gpt_oicq/wiki/设定AI人格---以猫娘为案例【chatGPT猫娘】）\nprompt = \"（你扮演的角色名称）:你要求AI扮演的角色信息\\n（AI扮演的角色名称）:AI的回应\"\n# 扮演的身份名称（前面填对话者，后面填bot要扮演的角色）\nstop = [\"（你扮演的角色名称）:\", \"（AI扮演的角色名称）:\"]\n\n"))
+		// 自动生成配置文件
+		_, err = f.Write([]byte("# config.toml 配置文件\n\n# cqhttp机器人配置\n[cqhttp]\n# go-cqhttp的正向WebSocket地址\nwebsocket = \"ws://127.0.0.1:8080\"\n# 群聊是否需要@机器人才能触发\nat_only = true\n# 是否开启触发关键词\nuse_keyword = false\n# 触发关键词场合 可选值: all, group, private, 开启群聊关键词建议关闭at_only\nkeyword_type = \"group\"\n# 触发关键词\nkeyword = \"对话\"\n# 生成中提醒时间秒数\ntimeout = 30\n\n# openai配置\n[openai]\n# 你的 OpenAI API Key, 可以在 https://beta.openai.com/account/api-keys 获取\napi_key = \"sk-xxxxxx\"\n# 使用的模型，默认是 gpt-3.5-turbo\nmodel = \"gpt-3.5-turbo\"\n# 对话温度，越大越随机 参照https://algowriting.medium.com/gpt-3-temperature-setting-101-41200ff0d0be\ntemperature = 0.3\n# 每次对话最大生成字符数\nmax_tokens = 1000\n# openai是否走代理，默认关闭\nuse_proxy = false\n# 代理地址\nproxy_url = \"http://127.0.0.1:7890\"\n\n# 角色信息配置\n[identity]\n# 角色扮演功能，默认关闭\nuse_identity = false\n# 角色扮演信息(如果不想使用这个功能，请删掉prompt双引号里的内容）（设定可以参考：https://github.com/easydu2002/chat_gpt_oicq/wiki/设定AI人格---以猫娘为案例【chatGPT猫娘】）\nprompt = \"（你扮演的角色名称）:你要求AI扮演的角色信息\\n（AI扮演的角色名称）:AI的回应\"\n# 扮演的身份名称（前面填对话者，后面填bot要扮演的角色）\nstop = [\"（你扮演的角色名称）:\", \"（AI扮演的角色名称）:\"]\n\n"))
 		if err != nil {
 			log.Println(err)
 		}
