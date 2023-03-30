@@ -11,11 +11,8 @@ func init() {
 }
 
 func main() {
-	
 	go cqhttp.Run()
 	for {
 		cqhttp.TimeOutCheck()
-
 	}
-
 }

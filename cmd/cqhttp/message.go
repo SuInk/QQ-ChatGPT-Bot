@@ -46,8 +46,8 @@ func init() {
 
 // HandleMsg 对CqHttp发送的json进行处理
 func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
-        // panic处理 暂时无法判断是否生效
-        defer func() {
+	// panic处理 暂时无法判断是否生效
+	defer func() {
 		if err := recover(); err != nil {
 			log.Println("panic:", err)
 			return
@@ -56,16 +56,21 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 	switch rcvMsg.MessageType {
 	case "private":
 		bot.MQ <- &rcvMsg
-		if strings.Contains(rcvMsg.Message, "clear") {
+		//输入“/clean”，清理缓存的历史记录（应该是吧？这块不是我写的，但是如果输入里有clear就执行这个clear命令就太破坏了，毕竟clear算常用单词）
+		if strings.TrimSpace(rcvMsg.Message) == "/clean" {
 			chatgpt.Cache.Clear(strconv.FormatInt(rcvMsg.Sender.UserId, 10))
+			err := bot.SendPrivateMsg(rcvMsg.Sender.UserId, "历史记录清理完成")
+			if err != nil {
+				log.Println(err)
+			}
+			log.Println("历史记录清理完成")
 			return
 		}
-		msg := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.Sender.UserId, 10), rcvMsg.Message)
-		var err error
+		msg, err := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.Sender.UserId, 10), rcvMsg.Message)
 		if msg != "" {
 			err = bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+msg)
 		} else {
-			err = bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+"生成错误！")
+			err = bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+"生成错误！错误信息:\n"+err.Error())
 		}
 		if err != nil {
 			log.Println(err)
@@ -76,17 +81,22 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 		if !isAt && config.Cfg.CqHttp.AtOnly || rcvMsg.Sender.UserId == bot.QQ {
 			return
 		}
-		if strings.Contains(rcvMsg.Message, "clear") {
+		if rcvMsg.Message == " /clean" {
 			chatgpt.Cache.Clear(strconv.FormatInt(rcvMsg.GroupId, 10))
+			err := bot.SendGroupMsg(rcvMsg.GroupId, "历史记录清理完成")
+			if err != nil {
+				println(err)
+			}
+			log.Println("历史记录清理完成")
 			return
 		}
 		bot.MQ <- &rcvMsg
-		msg := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.GroupId, 10), rcvMsg.Message)
-		var err error
+		msg, err := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.GroupId, 10), rcvMsg.Message)
+		//var err error
 		if msg != "" {
 			err = bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+msg)
 		} else {
-			err = bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+"生成错误！")
+			err = bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+"生成错误！错误信息：\n"+err.Error())
 		}
 		if err != nil {
 			log.Println(err)
