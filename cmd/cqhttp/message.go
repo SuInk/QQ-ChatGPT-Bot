@@ -71,7 +71,7 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 			return
 		}
 		bot.MQ <- &rcvMsg
-		msg, err := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.Sender.UserId, 10), rcvMsg.Message, config.Cfg.Context.GroupContext)
+		msg, err := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.Sender.UserId, 10), rcvMsg.Message, config.Cfg.Context.PrivateContext)
 		if msg != "" {
 			err = bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+msg)
 		} else {
