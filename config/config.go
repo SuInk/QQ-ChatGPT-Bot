@@ -29,6 +29,10 @@ type Config struct {
 		Prompt      string   `mapstructure:"prompt"`
 		Stop        []string `mapstructure:"stop"`
 	}
+	Context struct {
+		PrivateContext bool `mapstructure:"private_context"`
+		GroupContext   bool `mapstructure:"group_context"`
+	}
 }
 
 var Cfg Config
@@ -69,13 +73,17 @@ func init() {
 			"# 代理地址\n" +
 			"proxy_url = \"http://127.0.0.1:7890\"\n\n" +
 			"# 角色信息配置\n[identity]\n" +
-			"# 角色扮演功能，默认关闭\n" +
+			"# 角色预设功能，默认关闭\n" +
 			"use_identity = false\n" +
-			"# 角色扮演信息(如果不想使用这个功能，请删掉prompt双引号里的内容）（设定可以参考：https://github.com/easydu2002/chat_gpt_oicq/wiki/设定AI人格---以猫娘为案例【chatGPT猫娘】）\n" +
+			"# 角色预设信息(设定可以参考：https://github.com/easydu2002/chat_gpt_oicq/wiki/设定AI人格---以猫娘为案例【chatGPT猫娘】）\n" +
 			"prompt = \"（你扮演的角色名称）:你要求AI扮演的角色信息\\n（AI扮演的角色名称）:AI的回应\"\n" +
 			"# 扮演的身份名称（前面填对话者，后面填bot要扮演的角色）\n" +
-			"stop = [\"（你扮演的角色名称）:\", \"（AI扮演的角色名称）:\"]\n\n"))
-
+			"stop = [\"（你扮演的角色名称）:\", \"（AI扮演的角色名称）:\"]\n\n" +
+			"# 连续对话相关（实际使用中，连续对话似乎会导致更多的token使用，在这里可以设置是否启用这个功能。默认关闭。另注：预设角色不支持连续对话。）\n[context]\n" +
+			"# 是否在私聊中启用连续对话\n" +
+			"private_context = false\n" +
+			"# 是否在群聊中启用连续对话\n" +
+			"group_context = false\n"))
 		if err != nil {
 			log.Println(err)
 		}

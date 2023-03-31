@@ -99,18 +99,21 @@ func Client() (http.Client, error) {
 }
 
 // ChooseGenerateWay 选择生成方式
-func ChooseGenerateWay(session string, text string) (string, error) {
+func ChooseGenerateWay(session string, text string, useContext bool) (string, error) {
 	log.Println("正在调用OpenAI API生成文本...", text)
 	if config.Cfg.Identity.UseIdentity == false {
-		return GenerateText(session, text)
+		return GenerateText(session, text, useContext)
 	} else {
 		return GenerateTextWithIdentity(text)
 	}
 }
 
 // GenerateText 调用openai的API生成文本
-func GenerateText(session string, text string) (string, error) {
-	ms := Cache.GetMsg(session)
+func GenerateText(session string, text string, useContext bool) (string, error) {
+	var ms []Messages
+	if useContext {
+		ms = Cache.GetMsg(session)
+	}
 	message := &Messages{
 		Role:    "user",
 		Content: text,
@@ -156,8 +159,10 @@ func GenerateText(session string, text string) (string, error) {
 		return string(body), err
 	}
 	// 保存上下文
-	ms = append(ms, openAiRcv.Choices[0].Message)
-	Cache.SetMsg(session, ms)
+	if useContext {
+		ms = append(ms, openAiRcv.Choices[0].Message)
+		Cache.SetMsg(session, ms)
+	}
 	openAiRcv.Choices[0].Message.Content = strings.Replace(openAiRcv.Choices[0].Message.Content, "\n\n", "\n", 1)
 	log.Printf("Model: %s TotalTokens: %d+%d=%d", openAiRcv.Model, openAiRcv.Usage.PromptTokens, openAiRcv.Usage.CompletionTokes, openAiRcv.Usage.TotalTokens)
 	return openAiRcv.Choices[0].Message.Content, err

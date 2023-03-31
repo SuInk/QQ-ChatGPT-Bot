@@ -15,13 +15,15 @@
 ### Windows
 * 双击go-cqhttp可执行文件，按照提示登录QQ,选择2正向WebSocket
 * 双击QQ-ChatGPT-Bot可执行文件，将openai的api_key 填入`config.cfg`中，再次运行
-* 如果要使用角色扮演功能，则请在config中的identity下填写想要bot扮演的角色的信息。同时，请将openai配置下的model更换成“text-davinci-003”。
+* 如果要使用角色预设功能，则请在`config.cfg`中的identity下填写想要bot扮演的角色的信息。同时，请将openai配置下的model更换成“text-davinci-003”。
+* 如果要使用连续对话，请在`config.cfg`中的context下进行设置。如果要启用角色预设，则不支持连续对话。
 ### Linux
 ```bash
 ./go-cqhttp*
 # 按照提示操作,选择2正向websocket，将本地登录过的`sesssion.token`复制进服务器，防止tx风控
 ./QQ-ChatGPT*
-# 在config.cfg填入openai的api_key 
+# 在config.cfg填入openai的api_key
+# 其它配置参考windows的说明
 # 关掉窗口，运行：
 nohup ./go-cqhttp* &
 nohup ./QQ-ChatGPT* &

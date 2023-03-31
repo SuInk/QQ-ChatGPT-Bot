@@ -55,7 +55,6 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 	}()
 	switch rcvMsg.MessageType {
 	case "private":
-		bot.MQ <- &rcvMsg
 		//输入“/clean”，清理缓存的历史记录（应该是吧？这块不是我写的，但是如果输入里有clear就执行这个clear命令就太破坏了，毕竟clear算常用单词）
 		if strings.TrimSpace(rcvMsg.Message) == "/clean" {
 			chatgpt.Cache.Clear(strconv.FormatInt(rcvMsg.Sender.UserId, 10))
@@ -66,7 +65,8 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 			log.Println("历史记录清理完成")
 			return
 		}
-		msg, err := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.Sender.UserId, 10), rcvMsg.Message)
+		bot.MQ <- &rcvMsg
+		msg, err := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.Sender.UserId, 10), rcvMsg.Message, config.Cfg.Context.GroupContext)
 		if msg != "" {
 			err = bot.SendPrivateMsg(rcvMsg.Sender.UserId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+msg)
 		} else {
@@ -91,7 +91,7 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 			return
 		}
 		bot.MQ <- &rcvMsg
-		msg, err := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.GroupId, 10), rcvMsg.Message)
+		msg, err := chatgpt.ChooseGenerateWay(strconv.FormatInt(rcvMsg.GroupId, 10), rcvMsg.Message, config.Cfg.Context.GroupContext)
 		//var err error
 		if msg != "" {
 			err = bot.SendGroupMsg(rcvMsg.GroupId, "[CQ:reply,id="+strconv.FormatInt(rcvMsg.MessageId, 10)+"]"+msg)
