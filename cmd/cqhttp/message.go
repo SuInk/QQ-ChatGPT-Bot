@@ -55,6 +55,11 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 	}()
 	switch rcvMsg.MessageType {
 	case "private":
+		// 包含关键词才触发，运算符优先级 && > ||
+		if config.Cfg.CqHttp.UseKeyword && !strings.Contains(rcvMsg.Message, config.Cfg.CqHttp.Keyword) && (config.Cfg.CqHttp.KeywordType == "all" || config.Cfg.CqHttp.KeywordType == "private") || rcvMsg.Sender.UserId == bot.QQ {
+			return
+		}
+		rcvMsg.Message = strings.ReplaceAll(rcvMsg.Message, config.Cfg.CqHttp.Keyword, "")
 		//输入“/clean”，清理缓存的历史记录（应该是吧？这块不是我写的，但是如果输入里有clear就执行这个clear命令就太破坏了，毕竟clear算常用单词）
 		if strings.TrimSpace(rcvMsg.Message) == "/clean" {
 			chatgpt.Cache.Clear(strconv.FormatInt(rcvMsg.Sender.UserId, 10))
@@ -81,6 +86,11 @@ func (bot *Bot) HandleMsg(isAt bool, rcvMsg RcvMsg) {
 		if !isAt && config.Cfg.CqHttp.AtOnly || rcvMsg.Sender.UserId == bot.QQ {
 			return
 		}
+		// 检查是否有关键词
+		if config.Cfg.CqHttp.UseKeyword && !strings.Contains(rcvMsg.Message, config.Cfg.CqHttp.Keyword) && (config.Cfg.CqHttp.KeywordType == "all" || config.Cfg.CqHttp.KeywordType == "group") {
+			return
+		}
+		rcvMsg.Message = strings.ReplaceAll(rcvMsg.Message, config.Cfg.CqHttp.Keyword, "")
 		if rcvMsg.Message == " /clean" {
 			chatgpt.Cache.Clear(strconv.FormatInt(rcvMsg.GroupId, 10))
 			err := bot.SendGroupMsg(rcvMsg.GroupId, "历史记录清理完成")
