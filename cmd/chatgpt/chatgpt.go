@@ -99,18 +99,21 @@ func Client() (http.Client, error) {
 }
 
 // ChooseGenerateWay 选择生成方式
-func ChooseGenerateWay(session string, text string) string {
+func ChooseGenerateWay(session string, text string, useContext bool) (string, error) {
 	log.Println("正在调用OpenAI API生成文本...", text)
 	if config.Cfg.Identity.UseIdentity == false {
-		return GenerateText(session, text)
+		return GenerateText(session, text, useContext)
 	} else {
 		return GenerateTextWithIdentity(text)
 	}
 }
 
 // GenerateText 调用openai的API生成文本
-func GenerateText(session string, text string) string {
-	ms := Cache.GetMsg(session)
+func GenerateText(session string, text string, useContext bool) (string, error) {
+	var ms []Messages
+	if useContext {
+		ms = Cache.GetMsg(session)
+	}
 	message := &Messages{
 		Role:    "user",
 		Content: text,
@@ -125,7 +128,7 @@ func GenerateText(session string, text string) string {
 	postDataBytes, err := json.Marshal(postDataTemp)
 	if err != nil {
 		log.Println(err)
-		return ""
+		return "", err
 	}
 	req, _ := http.NewRequest("POST", Openaiapiurl1, bytes.NewBuffer(postDataBytes))
 	req.Header.Set("Content-Type", "application/json")
@@ -137,34 +140,36 @@ func GenerateText(session string, text string) string {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
-		return err.Error()
+		return err.Error(), err
 	}
 	defer resp.Body.Close()
 	if resp == nil {
 		log.Println("response is nil")
-		return ""
+		return "", err
 	}
 	body, _ := io.ReadAll(resp.Body)
 	var openAiRcv OpenAiRcv
 	err = json.Unmarshal(body, &openAiRcv)
 	if err != nil {
 		log.Println(err)
-		return err.Error()
+		return err.Error(), err
 	}
 	if len(openAiRcv.Choices) == 0 {
 		log.Println("OpenAI API调用失败，返回内容：", string(body))
-		return string(body)
+		return string(body), err
 	}
 	// 保存上下文
-	ms = append(ms, openAiRcv.Choices[0].Message)
-	Cache.SetMsg(session, ms)
+	if useContext {
+		ms = append(ms, openAiRcv.Choices[0].Message)
+		Cache.SetMsg(session, ms)
+	}
 	openAiRcv.Choices[0].Message.Content = strings.Replace(openAiRcv.Choices[0].Message.Content, "\n\n", "\n", 1)
 	log.Printf("Model: %s TotalTokens: %d+%d=%d", openAiRcv.Model, openAiRcv.Usage.PromptTokens, openAiRcv.Usage.CompletionTokes, openAiRcv.Usage.TotalTokens)
-	return openAiRcv.Choices[0].Message.Content
+	return openAiRcv.Choices[0].Message.Content, err
 }
 
 // GenerateTextWithIdentity 使用身份的时候，使用这个生成文本
-func GenerateTextWithIdentity(text string) string {
+func GenerateTextWithIdentity(text string) (string, error) {
 	postDataTemp := postDataWithIdentity{
 		Model:       config.Cfg.OpenAi.Model,
 		MaxTokens:   config.Cfg.OpenAi.MaxTokens,
@@ -175,7 +180,7 @@ func GenerateTextWithIdentity(text string) string {
 	postDataBytes, err := json.Marshal(postDataTemp)
 	if err != nil {
 		log.Println(err)
-		return err.Error()
+		return err.Error(), err
 	}
 	req, _ := http.NewRequest("POST", Openaiapiurl2, bytes.NewBuffer(postDataBytes))
 	req.Header.Set("Content-Type", "application/json")
@@ -187,12 +192,12 @@ func GenerateTextWithIdentity(text string) string {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
-		return err.Error()
+		return err.Error(), err
 	}
 	defer resp.Body.Close()
 	if resp == nil {
 		log.Println("response is nil")
-		return ""
+		return "", err
 	}
 	body, _ := io.ReadAll(resp.Body)
 	var openAiRcvWithIdentity OpenAiRcvWithIdentity
@@ -202,9 +207,9 @@ func GenerateTextWithIdentity(text string) string {
 	}
 	if len(openAiRcvWithIdentity.Choices) == 0 {
 		log.Println("OpenAI API调用失败，返回内容：", string(body))
-		return string(body)
+		return string(body), err
 	}
 	openAiRcvWithIdentity.Choices[0].Text = strings.Replace(openAiRcvWithIdentity.Choices[0].Text, "\n\n", "\n", 1)
 	log.Printf("Model: %s TotalTokens: %d+%d=%d", openAiRcvWithIdentity.Model, openAiRcvWithIdentity.Usage.PromptTokens, openAiRcvWithIdentity.Usage.CompletionTokes, openAiRcvWithIdentity.Usage.TotalTokens)
-	return openAiRcvWithIdentity.Choices[0].Text
+	return openAiRcvWithIdentity.Choices[0].Text, err
 }
