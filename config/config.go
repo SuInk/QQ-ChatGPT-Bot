@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/spf13/viper"
 	"log"
 	"os"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 type Config struct {
@@ -17,6 +18,7 @@ type Config struct {
 		TimeOut     int    `mapstructure:"timeout"`
 	}
 	OpenAi struct {
+		Url         string `mapstructure:"url"` //镜像站点链接，不填默认使用openai站点
 		ApiKey      string `mapstructure:"api_key"`
 		Model       string
 		Temperature float32
@@ -25,9 +27,8 @@ type Config struct {
 		ProxyUrl    string `mapstructure:"proxy_url"`
 	}
 	Identity struct {
-		UseIdentity bool     `mapstructure:"use_identity"`
-		Prompt      string   `mapstructure:"prompt"`
-		Stop        []string `mapstructure:"stop"`
+		Prompt string   `mapstructure:"prompt"`
+		Stop   []string `mapstructure:"stop"`
 	}
 	Context struct {
 		PrivateContext bool `mapstructure:"private_context"`
@@ -60,6 +61,8 @@ func init() {
 			"# 生成中提醒时间秒数\n" +
 			"timeout = 30\n\n" +
 			"# openai配置\n[openai]\n" +
+			"# 镜像站点链接，不填默认使用openai站点\n" +
+			"url = \"https://api.openai.com/v1/chat/completions\"\n" +
 			"# 你的 OpenAI API Key, 可以在 https://beta.openai.com/account/api-keys 获取\n" +
 			"api_key = \"sk-xxxxxx\"\n" +
 			"# 使用的模型，默认是 gpt-3.5-turbo\n" +
@@ -73,8 +76,6 @@ func init() {
 			"# 代理地址\n" +
 			"proxy_url = \"http://127.0.0.1:7890\"\n\n" +
 			"# 角色信息配置\n[identity]\n" +
-			"# 角色预设功能，默认关闭\n" +
-			"use_identity = false\n" +
 			"# 角色预设信息(设定可以参考：https://github.com/easydu2002/chat_gpt_oicq/wiki/设定AI人格---以猫娘为案例【chatGPT猫娘】）\n" +
 			"prompt = \"（你扮演的角色名称）:你要求AI扮演的角色信息\\n（AI扮演的角色名称）:AI的回应\"\n" +
 			"# 扮演的身份名称（前面填对话者，后面填bot要扮演的角色）\n" +
@@ -91,7 +92,7 @@ func init() {
 		time.Sleep(5 * time.Second)
 		os.Exit(0)
 	}
-	viper.SetConfigName("config.cfg")
+	viper.SetConfigName("config")
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(".") // 指定查找配置文件的路径
 	err := viper.ReadInConfig()
@@ -101,5 +102,9 @@ func init() {
 	err = viper.Unmarshal(&Cfg)
 	if err != nil {
 		log.Fatalf("unmarshal config failed: %v", err)
+	}
+
+	if Cfg.OpenAi.Url == "" {
+		Cfg.OpenAi.Url = "https://api.openai.com/v1/chat/completions"
 	}
 }

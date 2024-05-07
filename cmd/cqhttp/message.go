@@ -144,6 +144,7 @@ func TimeOutCheck() {
 		bot.MX.Unlock()
 	}
 }
+
 func (bot *Bot) SendPrivateMsg(userId int64, text string) error {
 	sendMsg := SendMsg{
 		Action: "send_private_msg",
@@ -161,6 +162,7 @@ func (bot *Bot) SendPrivateMsg(userId int64, text string) error {
 	}
 	return nil
 }
+
 func (bot *Bot) SendGroupMsg(groupId int64, text string) error {
 	sendMsg := SendMsg{
 		Action: "send_group_msg",
