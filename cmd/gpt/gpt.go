@@ -1,4 +1,4 @@
-package chatgpt
+package gpt
 
 import (
 	"bytes"
@@ -23,21 +23,13 @@ type Messages struct {
 	Content string `json:"content"`
 }
 
-// 对话使用的Request body
+// Request body
 type postData struct {
 	Model       string     `json:"model"`
 	Messages    []Messages `json:"messages"`
 	MaxTokens   int        `json:"max_tokens"`
 	Temperature float64    `json:"temperature"`
-}
-
-// 角色扮演使用的Request body
-type postDataWithIdentity struct {
-	Model       string        `json:"model"`
-	MaxTokens   int           `json:"max_tokens"`
-	Temperature float64       `json:"temperature"`
-	Prompt      []interface{} `json:"prompt"`
-	Stop        []string      `json:"stop"`
+	TopP        float64    `json:"top_p"`
 }
 
 // OpenAiRcv 对话使用的Response
@@ -104,38 +96,62 @@ func ChooseGenerateWay(session string, text string, useContext bool) (string, er
 // GenerateText 调用openai的API生成文本
 func GenerateText(session string, text string, useContext bool) (string, error) {
 	var ms []Messages
-	if useContext {
-		ms = Cache.GetMsg(session)
+	//检测是否有角色信息
+	if config.Cfg.RolePlay.Role != nil {
+		//遍历角色信息
+		for index, role := range config.Cfg.RolePlay.Role {
+			var message Messages
+			message.Role = role
+			message.Content = config.Cfg.RolePlay.Content[index]
+
+			ms = append(ms, message)
+		}
 	}
+
+	// 读取上下文
+	if useContext {
+		ms = append(ms, Cache.GetMsg(session)...)
+	}
+
+	// 填入本次对话内容
 	message := &Messages{
 		Role:    "user",
 		Content: text,
 	}
 	ms = append(ms, *message)
+
+	// 构造请求体
 	postDataTemp := postData{
 		Model:       config.Cfg.OpenAi.Model,
 		Messages:    ms,
 		MaxTokens:   config.Cfg.OpenAi.MaxTokens,
-		Temperature: float64(config.Cfg.OpenAi.Temperature),
+		Temperature: config.Cfg.OpenAi.Temperature,
 	}
+
+	//请求体序列化
 	postDataBytes, err := json.Marshal(postDataTemp)
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 
+	// 创建请求
 	req, _ := http.NewRequest("POST", config.Cfg.OpenAi.Url, bytes.NewBuffer(postDataBytes))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+config.Cfg.OpenAi.ApiKey)
+	req.Header.Set("api-key", config.Cfg.OpenAi.ApiKey) //兼容azure openai api
 	client, err := Client()
 	if err != nil {
 		log.Println(err)
 	}
+
+	// 发送请求
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
 		return err.Error(), err
 	}
+
 	defer resp.Body.Close()
 	if resp == nil {
 		log.Println("response is nil")
@@ -152,6 +168,7 @@ func GenerateText(session string, text string, useContext bool) (string, error) 
 		log.Println("OpenAI API调用失败，返回内容：", string(body))
 		return string(body), err
 	}
+
 	// 保存上下文
 	if useContext {
 		ms = append(ms, openAiRcv.Choices[0].Message)
